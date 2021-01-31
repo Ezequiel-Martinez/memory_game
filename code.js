@@ -1,22 +1,24 @@
-var board = document.querySelector(".board");
-var cards = document.querySelectorAll(".card");
-var timer = document.querySelector(".timer");
-var retryButton = document.querySelector(".retry");
-var x12Button = document.querySelector(".x12");
-var x24Button = document.querySelector(".x24");
-var x36Button = document.querySelector(".x36");
-var firstAttempt = true;
-var firstCard;
-var secondCard;
-var segundos = 0;
-var clock;
-var time;
+let board = document.querySelector(".board");
+let cards = document.querySelectorAll(".card");
+let timer = document.querySelector(".timer");
+let retryButton = document.querySelector(".retry");
+let x12Button = document.querySelector(".x12");
+let x24Button = document.querySelector(".x24");
+let x36Button = document.querySelector(".x36");
+let firstAttempt = true;
+let firstCard;
+let secondCard;
+let segundos = 0;
+let clock;
+let time;
+let unflip;
+let blockedBoard = false;
 
 x12Button.addEventListener("click", playX12);
 x24Button.addEventListener("click", playX24);
 x36Button.addEventListener("click", playX36);
 
-var x24 = `
+let x24 = `
         <div class="card " id="wattpad">
             <img src="./images/008-wattpad.svg" alt="wattpad" class="front-face">
             <img src="./images/backface.svg" alt="backface" class="back-face">
@@ -67,7 +69,7 @@ var x24 = `
         </div>
 `;
 
-var x36 = `
+let x36 = `
         <div class="card  " id="snapchat">
             <img src="./images/021-snapchat.svg" alt="snapchat" class="front-face">
             <img src="./images/backface.svg" alt="backface" class="back-face">
@@ -207,20 +209,16 @@ function setClock() {
 }
 
 function reset() {
+    clearTimeout(unflip);
+    blockedBoard = false;
+    firstAttempt = true;
     segundos = 0;
     timer.textContent = "00:0" + segundos + " seg";
     timer.classList.remove("win");
     clearInterval(clock);
     setClock();
     flipAll();
-}
-
-function blockBoard() {
-    cards.forEach(card => {card.removeEventListener("click", flipCard)});
-}
-
-function unblockBoard() {
-    cards.forEach(card => {card.addEventListener("click", flipCard)});
+    shuffleCards();
 }
 
 function checkWin() {
@@ -255,10 +253,12 @@ function unflipCards() {
     images2[0].classList.toggle("flip");
     images2[1].classList.toggle("flip");
 
-    unblockBoard();
+    blockedBoard = false;
 }
 
 function flipCard() {
+    if(blockedBoard == true) return;
+
     let images = this.children;
 
     if(!this.classList.contains("flip")) {
@@ -283,8 +283,8 @@ function flipCard() {
                 }
             }
             else {
-                blockBoard();
-                setTimeout(unflipCards, 1000);
+                blockedBoard = true;
+                unflip = setTimeout(unflipCards, 1000);
             }
         }
     }
